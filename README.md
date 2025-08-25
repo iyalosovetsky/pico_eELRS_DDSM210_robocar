@@ -28,3 +28,5 @@ The parts
 
 
 see my project to control by bluetouth joystick  https://github.com/iyalosovetsky/robocar 
+
+also  RC by CRSF protocol https://github.com/iyalosovetsky/pico_expressELRS_car/blob/main/README.md
