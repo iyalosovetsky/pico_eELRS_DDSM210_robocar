@@ -1,5 +1,5 @@
 from machine import UART, Pin
-import time
+import utime
 import uarray as arr
 
 
@@ -53,7 +53,7 @@ def get_full_command(command) -> bytes:
     return full_command
 
 class ddsm(object):
-    def __init__(self, uart, rx_PIO,rotate_dir=1 ):
+    def __init__(self, uart, rx_PIO,rotate_dir=1,debug=0 ):
         self.rxPio = rx_PIO
         self.uart = uart
         self.rotate_dir= rotate_dir
@@ -64,15 +64,18 @@ class ddsm(object):
         print('mode=',self.mode)
         self.setMode(0)
         print('mode=',self.mode)
+        self.debug=debug
         
     def getAnswer(self):
-      time.sleep(0.05)
+      #time.sleep(0.05)
+      utime.sleep_ms(10)
       if self.rxPio.recv():
         cnt = self.rxPio.get_data(self.buffer)
         #print('ret', cnt, [hex(ll)  for ll in self.buffer])
-        time.sleep(0.05)
+        #time.sleep(0.05)
+        utime.sleep_ms(10)
         return self.buffer
-      return ''
+      return None
     
     def ddsmCmd(self, cmd):
       _cmd=get_full_command(cmd)
@@ -96,7 +99,8 @@ class ddsm(object):
 
       else:
         _decr='?'
-        print('ddsmCmd: cmd=',[hex(ll)  for ll in _cmd])  
+        if self.debug>0:
+            print('ddsmCmd: cmd=',[hex(ll)  for ll in _cmd])  
 
       #print('ddsmCmd:',_decr,'ID=',bytearray(_cmd)[0])
       l=self.uart.write(_cmd)
@@ -105,6 +109,9 @@ class ddsm(object):
     
     def getId(self):
       _cmd0=b'\xC8\x64\x00\x00\x00\x00\x00\x00\x00'
+      _answ=self.ddsmCmd(_cmd0)
+      if _answ is None:
+            return None
       return bytearray(self.ddsmCmd(_cmd0))[0]
 
 
@@ -114,7 +121,9 @@ class ddsm(object):
     #0x02: set to velocity loop
     #0x03: set to position loop
     def setDrive0(self,driveMode=1,val=10, feedb=2, acctime=0): 
-      #Velocity loop command (－210～210 rpm)
+      if self.id is None:
+          return None
+    #Velocity loop command (－210～210 rpm)
       #01 64 FF CE 00 00 00 00 00 DA (-5rpm)
       #01 64 00 00 00 00 00 FF 00 D1 brake
       vel  =b'\x00\x64\x00\x00\x00\x00\x00\x00\x00' # pos=0
@@ -165,7 +174,8 @@ class ddsm(object):
             cmd_0[3]=vv%256 #Speed/position set low 8 bits
          
       cmd_1=bytes(cmd_0)
-      print('setDrive', [hex(ll)  for ll in cmd_1])
+      if self.debug>1:
+          print('setDrive', [hex(ll)  for ll in cmd_1])
       self.ddsmCmd(cmd_1)
 
     def setBrake(self):
@@ -184,6 +194,8 @@ class ddsm(object):
     #0x03: set to position loop
 
     def setMode(self, mode=0):
+        if self.id is None:
+          return None
         #01 64 FF CE 00 00 00 00 00 DA (-5rpm)
         vel  =b'\x00\xA0\x00\x00\x00\x00\x00\x00\x00' # pos=0
         cmd_0=bytearray(vel)
@@ -200,6 +212,8 @@ class ddsm(object):
     
     def getMode(self):
       #01 64 FF CE 00 00 00 00 00 DA (-5rpm)
+      if self.id is None:
+          return None
       vel  =b'\x00\x75\x00\x00\x00\x00\x00\x00\x00' # pos=0
       cmd_0=bytearray(vel)
       cmd_0[0]=self.id
@@ -220,6 +234,8 @@ class ddsm(object):
     #Error code:
 
     def getFeedback(self):    
+        if self.id is None:
+          return None
         vel  =b'\x00\x74\x00\x00\x00\x00\x00\x00\x00' # pos=0
         cmd_0=bytearray(vel)
         cmd_0[0]=self.id
@@ -237,7 +253,8 @@ class ddsm(object):
         for i in range(5):
             l=uart0.write(_cmd)
             print(_cmd, l)
-            time.sleep(0.075)
+            #time.sleep(0.075)
+            utime.sleep_ms(75)
         uartr=self.getAnswer()
         print('setId: id', bytearray(uartr)[0])
         return bytearray(uartr)[0]    
@@ -281,4 +298,5 @@ class ddsm(object):
 
     
     
+
 
