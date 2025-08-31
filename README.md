@@ -5,9 +5,9 @@
  This project has code to control the car platform by express ELRS receiver like betafpv nano receiver and TX12 RC . 
  The car is a four wheel drive platform powered by 4 PWM controlled motors. The code implements CRSF protocol on Raspberry Pico W to send command and retrieve telemetry data (battery state). 
 
-VIDEO [![Watch the video](https://img.youtube.com/vi/qGr-ukq5URo/default.jpg)](https://youtu.be/qGr-ukq5URo)
+[![Watch the video](https://img.youtube.com/vi/qGr-ukq5URo/default.jpg)](https://youtu.be/qGr-ukq5URo)
 
-VIDEO [![Watch the video](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)
+shorts [![Watch the video](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)
 
 
 
