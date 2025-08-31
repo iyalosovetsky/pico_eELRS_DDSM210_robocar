@@ -6,7 +6,8 @@
  The car is a four wheel drive platform powered by 4 PWM controlled motors. The code implements CRSF protocol on Raspberry Pico W to send command and retrieve telemetry data (battery state). 
 
 
-VIDEO [![Watch the video](https://img.youtube.com/vi/cAvKrcaPvDQ/default.jpg)](https://youtu.be/cAvKrcaPvDQ)
+VIDEO [![Watch the video](https://img.youtube.com/vi/cAvKrcaPvDQ/default.jpg)]([https://youtu.be/cAvKrcaPvDQ](https://www.youtube.com/shorts/qGr-ukq5URo))
+
 
 The parts 
 
