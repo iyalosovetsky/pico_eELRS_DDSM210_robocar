@@ -136,7 +136,12 @@ class Crsf():
         buffer[-1]=Crsf.crc8_data(buffer[2:-1])
         self.uart.write(buffer)
         #self.uart.write(bytearray([Crsf.CRSF_SYNC,0x0B, Crsf.BATTERY_SENSOR,  0x00, 0x25, 0x00, 0xBD, 0x00, 0x08, 0x97,0x14, Crsf.crc8_data([0x08])]))
+        #self.uart.write(bytearray([0xC8, 0x0B, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, Crsf.crc8_data([0x08])]))
+        #self.uart.write(bytearray([Crsf.CRSF_SYNC,0x0B, Crsf.BATTERY_SENSOR,  0x00, 0x25, 0x00, 0xBD, 0x00, 0x08, 0x97,0x14, Crsf.crc8_data([0x08])]))
 
+
+        
+                                          
 
 
     def handleCrsfPacket(self):
@@ -204,9 +209,3 @@ class Crsf():
         else :
             #print("unknown ptype",ptype)
             self.newRCData=0
-    
-        
- 
-
-
-
