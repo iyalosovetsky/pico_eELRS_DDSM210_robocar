@@ -1,11 +1,23 @@
-from robot_car import RobotCar
+from machine import UART, Pin
+
+import select, sys
+
+
+
+import os
 from crsf import Crsf
+from robo import Robo
 import utime
-from machine import UART, Pin, ADC
+
+BAUD = 115200
 
 
-CRSF_SYNC = 0xC8
-CHANNELS=[0 for jj in range(16)]
+                
+
+
+
+
+
 LEFT_VERTICAL=2
 LEFT_HORIZONTAL=3
 
@@ -19,107 +31,6 @@ C_SWITCH=6
 A_SWITCH=8
 
 
-
-# Pico W GPIO Pin
-'''LEFT_MOTOR1_PIN_1 = 16
-LEFT_MOTOR1_PIN_2 = 17
-RIGHT_MOTOR1_PIN_1 = 18
-RIGHT_MOTOR1_PIN_2 = 19
-MOTOR1_STBY = 20
-
-LEFT_MOTOR2_PIN_1 = 15
-LEFT_MOTOR2_PIN_2 = 14
-RIGHT_MOTOR2_PIN_1 = 13
-RIGHT_MOTOR2_PIN_2 = 12
-MOTOR2_STBY = 11
-'''
-
-''' 16 17 gnd 18 19 20
- forward nc  AIN2 AIN1 STBY BIN1 BIN2 NC GND
-         -    17   16   20   18   19  -  GND
-         -    blue mag  red  yel  ora -  green  
- 16 17 -> 0A 0B -> AIN1 AIN2 ->magenta blue
- 18 19 -> 1A 1B -> BIN1 BIN2 ->yellow orange
- 20 stand by
- #0A
-#define LEFT_MOTOR_FORWARD_PIN_1 18
- #0B
-#define LEFT_MOTOR_FORWARD_PIN_2 19
- #1A
-#define RIGHT_MOTOR_FORWARD_PIN_1 16
- #1B
-#define RIGHT_MOTOR_FORWARD_PIN_2 17
-#define MOTOR_FORWARD_STBY 20
-
-/* MOTOR_BACKWARD*/
-// 15 14 gnd  13 12 11
-// bacward nc  AIN2 AIN1 STBY BIN1 BIN2 NC GND
-//         -    15   14   11    12   13  -  GND
-//         -    mage blue red oran yell  -  green  
-// 14 15 -> 7A 7B -> AIN1 AIN2 -> blue magenta
-// 12 13 -> 6A 6B -> BIN1 BIN2 -> orange yellow
-// 11 stand by red
-// #7A
-#define LEFT_MOTOR_BACKWARD_PIN_1 14
-// #7B
-#define LEFT_MOTOR_BACKWARD_PIN_2 15
-// #6A
-#define RIGHT_MOTOR_BACKWARD_PIN_1 12
-// #6B
-#define RIGHT_MOTOR_BACKWARD_PIN_2 13
-#define MOTOR_BACKWARD_STBY 11
-
-'''
-LEFT_MOTOR1_PIN_1 = 18 
-LEFT_MOTOR1_PIN_2 = 19 
-RIGHT_MOTOR1_PIN_1 = 16
-RIGHT_MOTOR1_PIN_2 = 17
-MOTOR1_STBY = 20
-
-
-LEFT_MOTOR2_PIN_1 = 14
-LEFT_MOTOR2_PIN_2 = 15
-RIGHT_MOTOR2_PIN_1 = 12
-RIGHT_MOTOR2_PIN_2 = 13
-MOTOR2_STBY = 11
-
-
-uart = UART(1, baudrate=420000, bits=8, parity=None, stop=1, tx=Pin(8), rx=Pin(9))
-analogue_input = ADC(28)
-
-
-
-motor_forw_pins = [LEFT_MOTOR1_PIN_1, LEFT_MOTOR1_PIN_2, RIGHT_MOTOR1_PIN_1, RIGHT_MOTOR1_PIN_2,MOTOR1_STBY]
-motor_back_pins = [LEFT_MOTOR2_PIN_1, LEFT_MOTOR2_PIN_2, RIGHT_MOTOR2_PIN_1, RIGHT_MOTOR2_PIN_2,MOTOR2_STBY]
-
-# Create an instance of our robot car
-robot_car_forw = RobotCar(motor_forw_pins, 20000)
-robot_car_back = RobotCar(motor_back_pins, 20000)
-
-
-
-crsf1 = Crsf(uart)
-
-
-
-
-
-
-
-
-
-
-        
-        
- 
-
-maxLeftVertical=1700
-minLeftVertical=180
-
-maxLeftHorizontal=1700
-minLeftHorizontal=180
-
-
 MIN=180
 MAX=1750
 CENTER=992
@@ -128,45 +39,116 @@ TH=40
 
 
 
+#6. Velocity loop command (－210～210 rpm)
+#01 64 FF CE 00 00 00 00 00 DA (-5rpm)
+#01 64 FF 9C 00 00 00 00 00 9A (-10rpm)
+#01 64 00 00 00 00 00 00 00 50 (0rpm)
+#01 64 00 32 00 00 00 00 00 D3 (5rpm)
+#01 64 00 64 00 00 00 00 00 4F (10rpm)
+#7. Position loop command (0～32767 corresponds to 0～360°)
+#01 64 00 00 00 00 00 00 00 50 (0)
+#01 64 27 10 00 00 00 00 00 57 (10000)
+#01 64 4E 20 00 00 00 00 00 5E (20000)
+#01 64 75 30 00 00 00 00 00 A7 (30000)
 
-old_speed=0
-old_arrow=0
-old_turn=0
-old_turn_val=0
-ii = 0
-BAT_DIA=0.8*2 #v from 3.35 to 4.15 (100..0 prc)
-BAT_FULL =4.2*2 #v 2S bat
-BAT_CAPA =2900 #mAh 
-#https://stfn.pl/blog/22-pico-battery-level/
-VOLTAGE_K=3.3 * 3.232 / 65535 # Vref 3.3V 12bit 3.232 resistor divider
+
+#uart0 = UART(0, baudrate=115200, parity=None, stop=1, tx=Pin(0), rx=Pin(1))
+
+# for ddsm
+uart0 = UART(0, baudrate=BAUD, parity=None, stop=1, tx=Pin(12), rx=Pin(13) )
+#for telemetrt TX12
+uart1 = UART(1, baudrate=420000, bits=8, parity=None, stop=1, tx=Pin(8), rx=Pin(9))
 
 
-if __name__ == '__main__':
-    try:
+
+info=b'\x01\x74\x00\x00\x00\x00\x00\x00'
+#Data Field	DATA[0]	DATA[1]	DATA[2]	DATA[3]	DATA[4]	DATA[5]	DATA[6]	DATA[7]	DATA[8]	DATA[9]
+#Content	ID	0x64	Speed/position set high 8 bits	Speed/position set low 8 bits	Feedback 1 content	Feedback 2 content	Acceleration time	Brake	0	CRC8
+
+velo10  =b'\x01\x64\xff\xce\x00\x00\x00\x00\x00'
+pos1    =b'\x01\x64\x00\x10\x00\x00\x00\x00\x00' # pos=0
+set_id  =b'\xAA\x55\x53\x01\x00\x00\x00\x00\x00' #id=1
+#set_id=b'\xAA\x55\x53\x01\x00\x00\x00\x00\x00\xCB' # with crc
+#check_id=b'\xC8\x64\x00\x00\x00\x00\x00\x00\x00\xDE' # with crc
+
+#set_id=b'\x64\x00\x00\x00\x00\x0\x00\x00\xDE' # with crc
+
+#3. Brake command, valid in velocity loop mode.
+#01 64 00 00 00 00 00 FF 00 D1
+# rx PIO begin
+
+
+# ---------------------------------------------------------
+MOTORS=[{'rx':15,'sm':0,'dir':-1,'id':2,'name':'BackRight'},
+        {'rx':14,'sm':1,'dir':-1,'id':4,'name':'FrontRight'},
+        {'rx':11,'sm':4,'dir':1,'id':3,'name':'BackLeft'},
+        {'rx':10,'sm':5,'dir':1,'id':1,'name':'FrontLeft'}
+        ]
+
+
+crsf1 = Crsf(uart1)
+utime.sleep_ms(100)
+robo=Robo(MOTORS,uart0)
+utime.sleep_ms(100)
+robo.telemetry_change(arrow=1,speed=0.1,turn=0,turn_val=0,isBabyStep=False,isDisarmed=False)
+utime.sleep_ms(500)
+robo.telemetry_change(arrow=1,speed=0.0,turn=0,turn_val=0,isBabyStep=False,isDisarmed=False)
+
+# Створюємо об'єкт poll для моніторингу вхідного потоку (sys.stdin)
+poll_obj = select.poll()
+poll_obj.register(sys.stdin, select.POLLIN)
+
+print("Send me data over USB!")
+
+ii=0
+try:
         while True:
           ii+=1
           if crsf1.tick()!=1 :
               if crsf1.newRCData<=-9:
                 utime.sleep_ms(10)
-          if ii%100==0:
-            v2sbat=analogue_input.read_u16()* VOLTAGE_K
-            prc2s=(BAT_DIA-(BAT_FULL-v2sbat))/BAT_DIA
-            if prc2s>1:
-                prc2s=1
-            elif prc2s<0:
-                prc2s=0
-            v_bat=int(round(v2sbat*10,0 ))
-            v_prc=int(round(prc2s*100,0 ))
-            v_cap=int(round(BAT_CAPA*prc2s ,0 ))
-            
-        
-            
-            crsf1.sentBattery(v_bat,122, v_cap,v_prc)# 18ma 23% 1.2 A 4.1V    
-          
-          #print('->',CHANNELS[E_SWITCH],CHANNELS[LEFT_VERTICAL],CHANNELS[LEFT_HORIZONTAL],CHANNELS[RIGHT_VERTICAL],CHANNELS[RIGHT_HORIZONTAL])
+          if (ii%100) == 0:
+              need_init = False
+              for ii in range(len(robo.motors_def)):
+                if robo.motors[ii].id is None:
+                    need_init = True
+              if  need_init:     
+                    print(f" DDSM reinit:")
+                    robo.init_motors()
+                    
+                    
+                    
+              
+          # Перевіряємо, чи є дані для читання (timeout = 0, щоб не блокувати)
+          if poll_obj.poll(0):
+            # Якщо є, зчитуємо один рядок
+            data = sys.stdin.readline().strip()
+            if data:
+                print(f"I received: {data}")
+                if data.startswith('stat') or data.startswith('info'):
+                    print(f"status is:")
+                    print(f"  crsf1 :{crsf1.all_counter} {crsf1.cmd_counter}")
+                    print(f"  DDSM210 :")
+                    for ii in range(len(robo.motors_def)):
+                        print(f"    ddsm is: {ii} is {robo.motors[ii].id}")
+                        print(f"    ddsm is: {ii} is {robo.motors[ii].getFeedback()}")
+                elif data.startswith('ini'):
+                    print(f"status is:")
+                    print(f"  crsf1 :{crsf1.all_counter} {crsf1.cmd_counter}")
+                    print(f"  DDSM210 :")
+                    print(f"    init:")
+                    robo.init_motors()
+                    for ii in range(len(robo.motors_def)):
+                        print(f"    ddsm is: {ii} is {robo.motors[ii].id}")
+                        print(f"    ddsm is: {ii} is {robo.motors[ii].getFeedback()}")
+                    
+                    
+                
+                
+          #print('->',crsf1.channels[E_SWITCH],crsf1.channels[LEFT_VERTICAL],crsf1.channels[LEFT_HORIZONTAL],crsf1.channels[RIGHT_VERTICAL],crsf1.channels[RIGHT_HORIZONTAL])
           arrow=0
           speed=0
-          turn=0
+          turn=0 
           turn_val=0
           if abs(crsf1.channels[LEFT_VERTICAL]-CENTER)>TH:
             arrow=0
@@ -185,44 +167,14 @@ if __name__ == '__main__':
             else:
                 turn=-1
             #print('turn',turn,turn_val)
+                
+          
+          robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[LEFT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[LEFT_VERTICAL]>TH//2),isDisarmed=(crsf1.channels[E_SWITCH]<=CENTER))
+except KeyboardInterrupt:
+    print('break there')
+    robo.telemetry_change(arrow=0,speed=0,turn=0,turn_val=0,isBabyStep=False,isDisarmed=True)
+    
 
 
-          if crsf1.channels[E_SWITCH]>CENTER and  (old_arrow!=arrow or old_speed!=speed or old_turn!=old_turn or old_turn_val!=turn_val):
-              old_arrow=arrow 
-              old_speed=speed
-              old_turn=turn
-              old_turn_val=turn_val
-              if (arrow==0 or speed<0.12) and turn!=0 and turn_val>0.2 and (crsf1.channels[LEFT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[LEFT_VERTICAL]>TH//2):
-                  robot_car_forw.change_speed(0.19,0.);
-                  robot_car_back.change_speed(0.19,0.);
-                  robot_car_forw.move_reverse(turn)
-                  robot_car_back.move_reverse(turn)
-                      
-              elif speed==0 or arrow==0:
-                robot_car_forw.stop()
-                robot_car_back.stop()
-              elif arrow>0:
-                  robot_car_forw.change_speed(speed,turn*turn_val);
-                  robot_car_back.change_speed(speed,turn*turn_val);
-                  robot_car_forw.move_forward()
-                  robot_car_back.move_forward()
-              elif arrow<0:
-                  robot_car_forw.change_speed(speed,turn*turn_val);
-                  robot_car_back.change_speed(speed,turn*turn_val);
-                  robot_car_forw.move_backward()
-                  robot_car_back.move_backward()
-                 
-          elif crsf1.channels[E_SWITCH]<=CENTER :
-                robot_car_forw.stop()
-                robot_car_back.stop()
+print('Done.')
 
-                            
-
-
-
-        robot_car_forw.deinit()
-        robot_car_back.deinit()
-
-    except KeyboardInterrupt:
-        robot_car_forw.deinit()
-        robot_car_back.deinit()
