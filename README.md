@@ -6,8 +6,10 @@
  The car is a four wheel drive platform powered by 4 PWM controlled motors. The code implements CRSF protocol on Raspberry Pico W to send command and retrieve telemetry data (battery state). 
 
 
-VIDEO [![Watch the video](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)]([https://youtu.be/cAvKrcaPvDQ](https://www.youtube.com/shorts/qGr-ukq5URo))
+[photo](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)
 
+
+VIDEO [![Watch the video](https://github.com/iyalosovetsky/pico_eELRS_DDSM210_robocar/blob/main/img/20250831_162928.jpg)](https://youtu.be/cAvKrcaPvDQ)
 
 The parts 
 
