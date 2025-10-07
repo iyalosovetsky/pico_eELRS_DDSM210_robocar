@@ -259,3 +259,44 @@ class ddsm(object):
         print('setId: id', bytearray(uartr)[0])
         return bytearray(uartr)[0]    
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+    
+
+    
+
+
+
+
+    
+    
+                 
+        
+        
+    
+    
+
+    
+        
+        
+
+    
+    
+
+
