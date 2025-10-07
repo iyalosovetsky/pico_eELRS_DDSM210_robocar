@@ -145,15 +145,15 @@ try:
                     
                 
                 
-          #print('->',crsf1.channels[E_SWITCH],crsf1.channels[LEFT_VERTICAL],crsf1.channels[LEFT_HORIZONTAL],crsf1.channels[RIGHT_VERTICAL],crsf1.channels[RIGHT_HORIZONTAL])
+          #print('->',crsf1.channels[E_SWITCH],crsf1.channels[RIGHT_VERTICAL],crsf1.channels[LEFT_HORIZONTAL],crsf1.channels[RIGHT_VERTICAL],crsf1.channels[RIGHT_HORIZONTAL])
           arrow=0
           speed=0
           turn=0 
           turn_val=0
-          if abs(crsf1.channels[LEFT_VERTICAL]-CENTER)>TH:
+          if abs(crsf1.channels[RIGHT_VERTICAL]-CENTER)>TH:
             arrow=0
-            speed=abs(crsf1.channels[LEFT_VERTICAL]-CENTER)/CENTER
-            if crsf1.channels[LEFT_VERTICAL]-CENTER>0:
+            speed=abs(crsf1.channels[RIGHT_VERTICAL]-CENTER)/CENTER
+            if crsf1.channels[RIGHT_VERTICAL]-CENTER>0:
                 arrow=1
             else:
                 arrow=-1
@@ -169,7 +169,8 @@ try:
             #print('turn',turn,turn_val)
                 
           
-          robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[LEFT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[LEFT_VERTICAL]>TH//2),isDisarmed=(crsf1.channels[E_SWITCH]<=CENTER))
+          #robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[RIGHT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[RIGHT_VERTICAL]>TH//2),isDisarmed=(crsf1.channels[E_SWITCH]<=CENTER))
+          robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[RIGHT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[RIGHT_VERTICAL]>TH//2),isDisarmed=False)
 except KeyboardInterrupt:
     print('break there')
     robo.telemetry_change(arrow=0,speed=0,turn=0,turn_val=0,isBabyStep=False,isDisarmed=True)
