@@ -12,7 +12,7 @@ import utime
 
 BAUD = 115200
 class Robo():
-    def __init__(self, motors_def, motors_uart, MAX_SPEED=80.0 ):
+    def __init__(self, motors_def, motors_uart, MAX_SPEED=209.0 ):
         print("motors_def",motors_def)
         self.motors_uart=motors_uart
         self.speed = 0
@@ -78,7 +78,7 @@ class Robo():
 
 
     def run_engine(self):
-       if self.disarmed==0 and self.old_disarmed==1 and utime.ticks_ms()-self.update>10000 :
+       if self.disarmed==0 and self.old_disarmed==1 and utime.ticks_ms()-self.update>10000 and self.mode==0:
            self.init_motors()
        if self.disarmed==1 and (self.old_disarmed==0 or utime.ticks_ms()-self.update>10000) :
          print('try disarm')  
