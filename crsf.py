@@ -1,3 +1,5 @@
+import utime
+
 #https://github.com/crsf-wg/crsf/wiki/Packet-Types
 class Crsf():
     # https://github.com/crsf-wg/crsf/wiki/CRSF_FRAMETYPE_GPS
@@ -58,6 +60,9 @@ class Crsf():
         self.text=''
         self.newRCData=None
         self.uart = p_uart
+        self.update=utime.ticks_ms()
+        self.cmd_counter=0
+        self.all_counter=1
     
     
     @staticmethod
@@ -116,6 +121,7 @@ class Crsf():
         
         self.data = input_buffer[:expected_len]
         input_buffer = input_buffer[expected_len:]
+        self.all_counter+=1
         self.packet_validate=Crsf.crsf_validate_frame(self.data)
         if not self.packet_validate:
            packet = ' '.join(map(hex, self.data))
@@ -136,17 +142,13 @@ class Crsf():
         buffer[-1]=Crsf.crc8_data(buffer[2:-1])
         self.uart.write(buffer)
         #self.uart.write(bytearray([Crsf.CRSF_SYNC,0x0B, Crsf.BATTERY_SENSOR,  0x00, 0x25, 0x00, 0xBD, 0x00, 0x08, 0x97,0x14, Crsf.crc8_data([0x08])]))
-        #self.uart.write(bytearray([0xC8, 0x0B, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, Crsf.crc8_data([0x08])]))
-        #self.uart.write(bytearray([Crsf.CRSF_SYNC,0x0B, Crsf.BATTERY_SENSOR,  0x00, 0x25, 0x00, 0xBD, 0x00, 0x08, 0x97,0x14, Crsf.crc8_data([0x08])]))
 
-
-        
-                                          
 
 
     def handleCrsfPacket(self):
         self.newRCData=-1
         self.ptype = self.data[2]
+        self.cmd_counter+=1
         if self.ptype == Crsf.GPS:
             self.lat = int.from_bytes(self.data[3:7], byteorder='big', signed=True) / 1e7
             self.lon = int.from_bytes(self.data[7:11], byteorder='big', signed=True) / 1e7
@@ -209,3 +211,9 @@ class Crsf():
         else :
             #print("unknown ptype",ptype)
             self.newRCData=0
+    
+        
+ 
+
+
+
