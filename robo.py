@@ -11,6 +11,8 @@ from  dds210 import ddsm
 import utime
 
 BAUD = 115200
+C_BABYSTETP_SPEED = 100.
+
 class Robo():
     def __init__(self, motors_def, motors_uart, MAX_SPEED=209.0 ):
         print("motors_def",motors_def)
@@ -91,9 +93,9 @@ class Robo():
            if self.mode!=2 or utime.ticks_ms()-self.update>2000:  
              self.motors[ii].setMode(mode=2) # open loop
            if self.motors_def[ii]['name'].endswith('Right')  :  
-               self.motors[ii].setDrive0(val=-self.turn*5,driveMode=2, feedb=2)
+               self.motors[ii].setDrive0(val=int(-self.turn*C_BABYSTETP_SPEED*self.turn_val),driveMode=2, feedb=2)
            else:
-               self.motors[ii].setDrive0(val=self.turn*5,driveMode=2, feedb=2)
+               self.motors[ii].setDrive0(val=int(self.turn*C_BABYSTETP_SPEED*self.turn_val),driveMode=2, feedb=2)
            self.mode=2  
        elif self.disarmed==0 and self.arrow!=0:
          #print('try go ',int(self.MAX_SPEED*self.arrow*self.speed),self.turn*self.turn_val)  #arrow*speed,turn*turn_val
@@ -116,8 +118,3 @@ class Robo():
            if self.mode!=2 or utime.ticks_ms()-self.update>2000:
              self.motors[ii].setMode(mode=2) # open loop
            self.motors[ii].setBrake()
-                
-
-
-
-
