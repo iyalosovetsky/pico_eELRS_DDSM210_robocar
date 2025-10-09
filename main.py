@@ -34,7 +34,7 @@ A_SWITCH=8
 MIN=180
 MAX=1750
 CENTER=992
-TH=40
+TH=60
 
 
 
@@ -169,8 +169,7 @@ try:
             #print('turn',turn,turn_val)
                 
           
-          #robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[RIGHT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[RIGHT_VERTICAL]>TH//2),isDisarmed=(crsf1.channels[E_SWITCH]<=CENTER))
-          robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[RIGHT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[RIGHT_VERTICAL]>TH//2),isDisarmed=False)
+          robo.telemetry_change(arrow=arrow,speed=speed,turn=turn,turn_val=turn_val,isBabyStep=(crsf1.channels[RIGHT_VERTICAL]-CENTER>TH//2 or CENTER-crsf1.channels[RIGHT_VERTICAL]>TH//2),isDisarmed=(crsf1.channels[E_SWITCH]<=CENTER))
 except KeyboardInterrupt:
     print('break there')
     robo.telemetry_change(arrow=0,speed=0,turn=0,turn_val=0,isBabyStep=False,isDisarmed=True)
