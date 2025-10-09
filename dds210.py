@@ -159,8 +159,8 @@ class ddsm(object):
             #01 64 00 00 00 00 00 00 00 50 (0rpm)
             #01 64 00 32 00 00 00 00 00 D3 (5rpm)
             #01 64 00 64 00 00 00 00 00 4F (10rpm)
-            cmd_0[2]=vv//256 #Speed/position set high 8 bits
-            cmd_0[3]=vv%256 #Speed/position set low 8 bits
+            cmd_0[2]=int(vv)//256 #Speed/position set high 8 bits
+            cmd_0[3]=int(vv)%256 #Speed/position set low 8 bits
         elif driveMode==3: #pos mode 0～32767 --todo calc for self.rotate_dir==-1
             if val<0:
                  print('bad value for mode 1')
@@ -170,8 +170,8 @@ class ddsm(object):
             #01 64 27 10 00 00 00 00 00 57 (10000)
             #01 64 4E 20 00 00 00 00 00 5E (20000)
             #01 64 75 30 00 00 00 00 00 A7 (30000)            
-            cmd_0[2]=vv//256 #Speed/position set high 8 bits
-            cmd_0[3]=vv%256 #Speed/position set low 8 bits
+            cmd_0[2]=int(vv)//256 #Speed/position set high 8 bits
+            cmd_0[3]=int(vv)%256 #Speed/position set low 8 bits
          
       cmd_1=bytes(cmd_0)
       if self.debug>1:
@@ -258,45 +258,3 @@ class ddsm(object):
         uartr=self.getAnswer()
         print('setId: id', bytearray(uartr)[0])
         return bytearray(uartr)[0]    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-    
-
-    
-
-
-
-
-    
-    
-                 
-        
-        
-    
-    
-
-    
-        
-        
-
-    
-    
-
-
